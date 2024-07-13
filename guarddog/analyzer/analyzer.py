@@ -57,6 +57,10 @@ class Analyzer:
             ".semgrep_logs",
         ]
 
+        self.rule_weights = {
+            "npm-serialize-environment": 0.5
+        }
+
     def analyze(self, path, info=None, rules=None, name: Optional[str] = None, version: Optional[str] = None) -> dict:
         """
         Analyzes a package in the given path
@@ -88,7 +92,12 @@ class Analyzer:
         results = metadata_results["results"] | sourcecode_results["results"]
         errors = metadata_results["errors"] | sourcecode_results["errors"]
 
-        return {"issues": issues, "errors": errors, "results": results, "path": path}
+        total_weight = metadata_results["total_weight"] + sourcecode_results["total_weight"]
+
+        max_possible_weight = sum(self.rule_weights.values())
+        confidence = (total_weight / max_possible_weight) * 100 
+ 
+        return {"issues": issues, "errors": errors, "results": results, "path": path, "confidence": confidence}
 
     def analyze_metadata(self, path: str, info, rules=None, name: Optional[str] = None,
                          version: Optional[str] = None) -> dict:
@@ -114,6 +123,7 @@ class Analyzer:
         results: dict[str, Optional[str]] = {}
         errors = {}
         issues = 0
+        total_weight = 0
 
         for rule in all_rules:
             try:
@@ -123,10 +133,11 @@ class Analyzer:
                 if rule_matches:
                     issues += 1
                     results[rule] = message
+                    total_weight += self.rule_weights.get(rule, 0.1)
             except Exception as e:
                 errors[rule] = f"failed to run rule {rule}: {str(e)}"
 
-        return {"results": results, "errors": errors, "issues": issues}
+        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight}
 
     def analyze_sourcecode(self, path, rules=None) -> dict:
         """
@@ -148,6 +159,7 @@ class Analyzer:
         results = {rule: {} for rule in all_rules}  # type: dict
         errors = {}
         issues = 0
+        total_weight = 0
 
         rules_path = list(map(
             lambda rule_name: os.path.join(self.sourcecode_rules_path, f"{rule_name}.yml"),
@@ -156,7 +168,7 @@ class Analyzer:
 
         if len(rules_path) == 0:
             log.debug("No source code rules to run")
-            return {"results": {}, "errors": {}, "issues": 0}
+            return {"results": {}, "errors": {}, "issues": 0, "total_weight": 0}
 
         try:
             log.debug(f"Running source code rules against {path}")
@@ -164,11 +176,14 @@ class Analyzer:
             rule_results = self._format_semgrep_response(response, targetpath=targetpath)
             issues += sum(len(res) for res in rule_results.values())
 
+            for rule in rule_results:
+                total_weight += self.rule_weights.get(rule, 0.1) * len(rule_results[rule])
+
             results = results | rule_results
         except Exception as e:
             errors["rules-all"] = f"failed to run rule: {str(e)}"
 
-        return {"results": results, "errors": errors, "issues": issues}
+        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight}
 
     def _invoke_semgrep(self, target: str, rules: Iterable[str]):
         try:

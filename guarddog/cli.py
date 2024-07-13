@@ -461,6 +461,7 @@ def scan(
 def print_scan_results(results, identifier):
     num_issues = results.get("issues")
     errors = results.get("errors", [])
+    confidence = str(results.get("confidence"))
 
     if num_issues == 0:
         print(
@@ -481,6 +482,8 @@ def print_scan_results(results, identifier):
             + " in "
             + colored(identifier, None, attrs=["bold"])
         )
+        print()
+        print("Confidence: " + confidence)
         print()
 
         findings = results.get("results", [])

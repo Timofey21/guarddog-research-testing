@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import math
 import subprocess
 from collections import defaultdict
 from pathlib import Path
@@ -58,7 +59,16 @@ class Analyzer:
         ]
 
         self.rule_weights = {
-            "npm-serialize-environment": 0.5
+            "npm-serialize-environment": 5,
+            "npm-obfuscation": 6,
+            "npm-silent-process-execution": 8,
+            "shady-links": 8,
+            "npm-exec-base64": 9,
+            "npm-install-script": 7,
+            "npm-steganography": 7,
+            "bidirectional-characters": 8,
+            "npm-dll-hijacking": 8,
+            "npm-exfiltrate-sensitive-data": 6
         }
 
     def analyze(self, path, info=None, rules=None, name: Optional[str] = None, version: Optional[str] = None) -> dict:
@@ -80,6 +90,9 @@ class Analyzer:
         metadata_results = None
         sourcecode_results = None
 
+    
+
+
         # populate results, errors, and number of issues
         log.debug(f"Running metadata rules against package '{name}'")
         metadata_results = self.analyze_metadata(path, info, rules, name, version)
@@ -91,13 +104,9 @@ class Analyzer:
         issues = metadata_results["issues"] + sourcecode_results["issues"]
         results = metadata_results["results"] | sourcecode_results["results"]
         errors = metadata_results["errors"] | sourcecode_results["errors"]
-
-        total_weight = metadata_results["total_weight"] + sourcecode_results["total_weight"]
-
-        max_possible_weight = sum(self.rule_weights.values())
-        confidence = (total_weight / max_possible_weight) * 100 
+        
  
-        return {"issues": issues, "errors": errors, "results": results, "path": path, "confidence": confidence}
+        return {"issues": issues, "errors": errors, "results": results, "path": path}
 
     def analyze_metadata(self, path: str, info, rules=None, name: Optional[str] = None,
                          version: Optional[str] = None) -> dict:
@@ -123,7 +132,7 @@ class Analyzer:
         results: dict[str, Optional[str]] = {}
         errors = {}
         issues = 0
-        total_weight = 0
+        
 
         for rule in all_rules:
             try:
@@ -133,11 +142,10 @@ class Analyzer:
                 if rule_matches:
                     issues += 1
                     results[rule] = message
-                    total_weight += self.rule_weights.get(rule, 0.1)
             except Exception as e:
                 errors[rule] = f"failed to run rule {rule}: {str(e)}"
 
-        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight}
+        return {"results": results, "errors": errors, "issues": issues}
 
     def analyze_sourcecode(self, path, rules=None) -> dict:
         """
@@ -160,6 +168,9 @@ class Analyzer:
         errors = {}
         issues = 0
         total_weight = 0
+        confidence = 0
+
+
 
         rules_path = list(map(
             lambda rule_name: os.path.join(self.sourcecode_rules_path, f"{rule_name}.yml"),
@@ -177,13 +188,17 @@ class Analyzer:
             issues += sum(len(res) for res in rule_results.values())
 
             for rule in rule_results:
-                total_weight += self.rule_weights.get(rule, 0.1) * len(rule_results[rule])
+                total_weight += self.rule_weights.get(rule, 0)
 
             results = results | rule_results
         except Exception as e:
             errors["rules-all"] = f"failed to run rule: {str(e)}"
 
-        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight}
+
+        max_possible_weight = sum(self.rule_weights.values()) 
+        confidence = 100 * math.log(1 + total_weight) / math.log(1 + max_possible_weight)
+
+        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight, "confidence": confidence, "max_weight": max_possible_weight}
 
     def _invoke_semgrep(self, target: str, rules: Iterable[str]):
         try:

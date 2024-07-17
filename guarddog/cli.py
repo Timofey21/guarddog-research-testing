@@ -473,6 +473,11 @@ def print_scan_results(results, identifier):
             + colored(identifier, None, attrs=["bold"])
         )
         print()
+        print("Total weight: " + total_weight + "/" + max_weight)
+        print()
+        print("Confidence: " + confidence + " %") 
+        print()
+        print()
     else:
         print(
             "Found "

@@ -462,8 +462,8 @@ def print_scan_results(results, identifier):
     num_issues = results.get("issues")
     errors = results.get("errors", [])
     confidence = str(round(results.get("confidence"), 2))
-    total_weight = str(results.get("total_weight"))
-    max_weight = str(results.get("max_weight"))
+    confidence_total_weight = str(results.get("confidence_total_weight"))
+    confidence_max_weight = str(results.get("confidence_max_weight"))
 
     if num_issues == 0:
         print(
@@ -473,7 +473,7 @@ def print_scan_results(results, identifier):
             + colored(identifier, None, attrs=["bold"])
         )
         print()
-        print("Total weight: " + total_weight + "/" + max_weight)
+        print("Confidence total weight: " + confidence_total_weight + "/" + confidence_max_weight)
         print()
         print("Confidence: " + confidence + " %") 
         print()
@@ -490,7 +490,7 @@ def print_scan_results(results, identifier):
             + colored(identifier, None, attrs=["bold"])
         )
         print()
-        print("Total weight: " + total_weight + "/" + max_weight)
+        print("Confidence total weight: " + confidence_total_weight + "/" + confidence_max_weight)
         print()
         print("Confidence: " + confidence + " %") 
         print()

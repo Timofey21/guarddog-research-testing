@@ -58,7 +58,7 @@ class Analyzer:
             ".semgrep_logs",
         ]
 
-        self.rule_weights = {
+        self.confidence_rule_weights = {
             "npm-serialize-environment": 5,
             "npm-obfuscation": 6,
             "npm-silent-process-execution": 8,
@@ -91,7 +91,6 @@ class Analyzer:
         sourcecode_results = None
 
     
-
 
         # populate results, errors, and number of issues
         log.debug(f"Running metadata rules against package '{name}'")
@@ -167,7 +166,7 @@ class Analyzer:
         results = {rule: {} for rule in all_rules}  # type: dict
         errors = {}
         issues = 0
-        total_weight = 0
+        confidence_total_weight = 0
         confidence = 0
 
 
@@ -188,17 +187,17 @@ class Analyzer:
             issues += sum(len(res) for res in rule_results.values())
 
             for rule in rule_results:
-                total_weight += self.rule_weights.get(rule, 0)
+                confidence_total_weight += self.condifence_rule_weights.get(rule, 0)
 
             results = results | rule_results
         except Exception as e:
             errors["rules-all"] = f"failed to run rule: {str(e)}"
 
 
-        max_possible_weight = sum(self.rule_weights.values()) 
-        confidence = 100 * math.log(1 + total_weight) / math.log(1 + max_possible_weight)
+        confidence_max_weight = sum(self.confidence_rule_weights.values()) 
+        confidence = 100 * math.log(1 + confidence_total_weight) / math.log(1 + confidence_max_weight)
 
-        return {"results": results, "errors": errors, "issues": issues, "total_weight": total_weight, "confidence": confidence, "max_weight": max_possible_weight}
+        return {"results": results, "errors": errors, "issues": issues, "confidence_total_weight": confidence_total_weight, "confidence": confidence, "confidence_max_weight": confidence_max_weight}
 
     def _invoke_semgrep(self, target: str, rules: Iterable[str]):
         try:

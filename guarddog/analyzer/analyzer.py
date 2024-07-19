@@ -70,6 +70,20 @@ class Analyzer:
             "npm-dll-hijacking": 8,
             "npm-exfiltrate-sensitive-data": 6
         }
+        
+        self.severity_rule_weights = {
+            "npm-serialize-environment": 4,
+            "npm-obfuscation": 5,
+            "npm-silent-process-execution": 9,
+            "shady-links": 7,
+            "npm-exec-base64": 9,
+            "npm-install-script": 6,
+            "npm-steganography": 5,
+            "bidirectional-characters": 6,
+            "npm-dll-hijacking": 8,
+            "npm-exfiltrate-sensitive-data": 5
+        }
+
 
     def analyze(self, path, info=None, rules=None, name: Optional[str] = None, version: Optional[str] = None) -> dict:
         """
@@ -168,6 +182,8 @@ class Analyzer:
         issues = 0
         confidence_total_weight = 0
         confidence = 0
+        severity_total_weight = 0
+        severity = 0
 
 
 
@@ -187,7 +203,8 @@ class Analyzer:
             issues += sum(len(res) for res in rule_results.values())
 
             for rule in rule_results:
-                confidence_total_weight += self.condifence_rule_weights.get(rule, 0)
+                confidence_total_weight += self.confidence_rule_weights.get(rule, 0)
+                severity_total_weight += self.severity_rule_weights.get(rule, 0)
 
             results = results | rule_results
         except Exception as e:
@@ -197,7 +214,12 @@ class Analyzer:
         confidence_max_weight = sum(self.confidence_rule_weights.values()) 
         confidence = 100 * math.log(1 + confidence_total_weight) / math.log(1 + confidence_max_weight)
 
-        return {"results": results, "errors": errors, "issues": issues, "confidence_total_weight": confidence_total_weight, "confidence": confidence, "confidence_max_weight": confidence_max_weight}
+        severity_max_weight = sum(self.severity_rule_weights.values())
+        severity = 100 * math.log(1 + severity_total_weight) / math.log(1 + severity_max_weight)
+
+        return {"results": results, "errors": errors, "issues": issues, "confidence_total_weight": confidence_total_weight, \
+                 "confidence": confidence, "confidence_max_weight": confidence_max_weight, "severity_total_weight": severity_total_weight, \
+                      "severity": severity, "severity_max_weight": severity_max_weight}
 
     def _invoke_semgrep(self, target: str, rules: Iterable[str]):
         try:

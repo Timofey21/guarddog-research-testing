@@ -1,0 +1,12 @@
+{
+    "npm-serialize-environment": 4,
+    "npm-obfuscation": 5,
+    "npm-silent-process-execution": 9,
+    "shady-links": 7,
+    "npm-exec-base64": 9,
+    "npm-install-script": 6,
+    "npm-steganography": 5,
+    "bidirectional-characters": 6,
+    "npm-dll-hijacking": 8,
+    "npm-exfiltrate-sensitive-data": 5
+}

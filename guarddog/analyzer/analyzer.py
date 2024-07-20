@@ -10,6 +10,7 @@ from typing import Iterable, Optional
 from guarddog.analyzer.metadata import get_metadata_detectors
 from guarddog.analyzer.sourcecode import SOURCECODE_RULES
 from guarddog.ecosystems import ECOSYSTEM
+from guarddog.utils.read_json import read_json
 
 SEMGREP_MAX_TARGET_BYTES = 10_000_000
 
@@ -58,31 +59,35 @@ class Analyzer:
             ".semgrep_logs",
         ]
 
-        self.confidence_rule_weights = {
-            "npm-serialize-environment": 5,
-            "npm-obfuscation": 6,
-            "npm-silent-process-execution": 8,
-            "shady-links": 8,
-            "npm-exec-base64": 9,
-            "npm-install-script": 7,
-            "npm-steganography": 7,
-            "bidirectional-characters": 8,
-            "npm-dll-hijacking": 8,
-            "npm-exfiltrate-sensitive-data": 6
-        }
+        # self.confidence_rule_weights = {
+        #     "npm-serialize-environment": 5,
+        #     "npm-obfuscation": 6,
+        #     "npm-silent-process-execution": 8,
+        #     "shady-links": 8,
+        #     "npm-exec-base64": 9,
+        #     "npm-install-script": 7,
+        #     "npm-steganography": 7,
+        #     "bidirectional-characters": 8,
+        #     "npm-dll-hijacking": 8,
+        #     "npm-exfiltrate-sensitive-data": 6
+        # }
         
-        self.severity_rule_weights = {
-            "npm-serialize-environment": 4,
-            "npm-obfuscation": 5,
-            "npm-silent-process-execution": 9,
-            "shady-links": 7,
-            "npm-exec-base64": 9,
-            "npm-install-script": 6,
-            "npm-steganography": 5,
-            "bidirectional-characters": 6,
-            "npm-dll-hijacking": 8,
-            "npm-exfiltrate-sensitive-data": 5
-        }
+        # self.severity_rule_weights = {
+        #     "npm-serialize-environment": 4,
+        #     "npm-obfuscation": 5,
+        #     "npm-silent-process-execution": 9,
+        #     "shady-links": 7,
+        #     "npm-exec-base64": 9,
+        #     "npm-install-script": 6,
+        #     "npm-steganography": 5,
+        #     "bidirectional-characters": 6,
+        #     "npm-dll-hijacking": 8,
+        #     "npm-exfiltrate-sensitive-data": 5
+        # }
+
+
+        self.confidence_rule_weights = read_json("guarddog/confidence_weights.json")
+        self.severity_rule_weights = read_json("guarddog/severity_weights.json")
 
 
     def analyze(self, path, info=None, rules=None, name: Optional[str] = None, version: Optional[str] = None) -> dict:

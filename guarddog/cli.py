@@ -456,12 +456,7 @@ def scan(
         ECOSYSTEM.PYPI,
     )
 
-
-# Pretty prints scan results for the console
-def print_scan_results(results, identifier):
-    num_issues = results.get("issues")
-    errors = results.get("errors", [])
-
+def print_analytics(results):
     confidence = str(round(results.get("confidence"), 2))
     confidence_total_weight = str(results.get("confidence_total_weight"))
     confidence_max_weight = str(results.get("confidence_max_weight"))
@@ -469,6 +464,21 @@ def print_scan_results(results, identifier):
     severity = str(round(results.get("severity"), 2))
     severity_total_weight = str(results.get("severity_total_weight"))
     severity_max_weight = str(results.get("severity_max_weight"))
+
+    print("Confidence total weight: " + confidence_total_weight + "/" + confidence_max_weight)
+    print("Severity total weight: " + severity_total_weight + "/" + severity_max_weight)
+    print()
+    print("Confidence: " + confidence + " %") 
+    print("Severity: " + severity + " %")
+    print()
+    print(confidence)
+    print(severity)
+
+
+# Pretty prints scan results for the console
+def print_scan_results(results, identifier):
+    num_issues = results.get("issues")
+    errors = results.get("errors", [])
 
     if num_issues == 0:
         print(
@@ -478,12 +488,7 @@ def print_scan_results(results, identifier):
             + colored(identifier, None, attrs=["bold"])
         )
         print()
-        print("Confidence total weight: " + confidence_total_weight + "/" + confidence_max_weight)
-        print("Severity total weight: " + severity_total_weight + "/" + severity_max_weight)
-        print()
-        print("Confidence: " + confidence + " %") 
-        print("Severity " + severity + " %") 
-        print()
+        print_analytics(results)
     else:
         print(
             "Found "
@@ -495,12 +500,6 @@ def print_scan_results(results, identifier):
             + " in "
             + colored(identifier, None, attrs=["bold"])
         )
-        print()
-        print("Confidence total weight: " + confidence_total_weight + "/" + confidence_max_weight)
-        print("Severity total weight: " + severity_total_weight + "/" + severity_max_weight)
-        print()
-        print("Confidence: " + confidence + " %") 
-        print("Severity " + severity + " %")
         print()
 
         findings = results.get("results", [])
@@ -527,6 +526,7 @@ def print_scan_results(results, identifier):
                         + format_code_line_for_output(finding["code"])
                     )
                 print()
+                print_analytics(results)
 
     if len(errors) > 0:
         print_errors(errors, identifier)
@@ -550,6 +550,7 @@ def format_code_line_for_output(code):
         "on_red",
         attrs=["bold"],
     )
+
 
 
 # Given the results, exit with the appropriate status code

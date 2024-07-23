@@ -456,7 +456,7 @@ def scan(
         ECOSYSTEM.PYPI,
     )
 
-def print_analytics(results):
+def print_analytics(results, rules_list):
     confidence = str(round(results.get("confidence"), 2))
     confidence_total_weight = str(results.get("confidence_total_weight"))
     confidence_max_weight = str(results.get("confidence_max_weight"))
@@ -471,6 +471,7 @@ def print_analytics(results):
     print("Confidence: " + confidence + " %") 
     print("Severity: " + severity + " %")
     print()
+    print(', '.join(rules_list))
     print(confidence)
     print(severity)
 
@@ -502,6 +503,8 @@ def print_scan_results(results, identifier):
         )
         print()
 
+        rules_list = []
+
         findings = results.get("results", [])
         for finding in findings:
             description = findings[finding]
@@ -510,6 +513,7 @@ def print_scan_results(results, identifier):
                 print()
             elif isinstance(description, list):  # semgrep rule result:
                 source_code_findings = description
+                rules_list.append(finding)
                 print(
                     colored(finding, None, attrs=["bold"])
                     + ": found "
@@ -526,7 +530,7 @@ def print_scan_results(results, identifier):
                         + format_code_line_for_output(finding["code"])
                     )
                 print()
-                print_analytics(results)
+        print_analytics(results, rules_list)
 
     if len(errors) > 0:
         print_errors(errors, identifier)

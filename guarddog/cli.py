@@ -481,6 +481,8 @@ def print_scan_results(results, identifier):
     num_issues = results.get("issues")
     errors = results.get("errors", [])
 
+    rules_list = []
+
     if num_issues == 0:
         print(
             "Found "
@@ -489,7 +491,7 @@ def print_scan_results(results, identifier):
             + colored(identifier, None, attrs=["bold"])
         )
         print()
-        print_analytics(results)
+        print_analytics(results, rules_list)
     else:
         print(
             "Found "
@@ -530,6 +532,7 @@ def print_scan_results(results, identifier):
                         + format_code_line_for_output(finding["code"])
                     )
                 print()
+                       
         print_analytics(results, rules_list)
 
     if len(errors) > 0:

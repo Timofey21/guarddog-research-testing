@@ -189,6 +189,11 @@ class Analyzer:
         except Exception as e:
             errors["rules-all"] = f"failed to run rule: {str(e)}"
 
+        if severity_total_weight < 0:
+            severity_total_weight = 0
+
+        if confidence_total_weight < 0:
+            severity_total_weight = 0
 
         confidence_max_weight = sum(self.confidence_rule_weights.values()) 
         confidence = 100 * math.log(1 + confidence_total_weight) / math.log(1 + confidence_max_weight)

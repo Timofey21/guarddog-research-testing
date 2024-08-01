@@ -1,12 +1,12 @@
 {
-    "npm-serialize-environment": 5.0,
-    "npm-obfuscation": 15.23536749999999,
-    "npm-silent-process-execution": 8.0,
-    "shady-links": 10.975739999999984,
-    "npm-exec-base64": 9.0,
-    "npm-install-script": 7.785527000000021,
-    "npm-steganography": 6.0,
-    "bidirectional-characters": 5.0,
-    "npm-dll-hijacking": 8.0,
-    "npm-exfiltrate-sensitive-data": 11.808979500000012
+    "npm-serialize-environment": 5,
+    "npm-obfuscation": 4,
+    "npm-silent-process-execution": 8,
+    "shady-links": 6,
+    "npm-exec-base64": 9,
+    "npm-install-script": 5,
+    "npm-steganography": 6,
+    "bidirectional-characters": 5,
+    "npm-dll-hijacking": 8,
+    "npm-exfiltrate-sensitive-data": 6
 }
